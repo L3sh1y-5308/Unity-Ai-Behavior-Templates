@@ -7,7 +7,7 @@ public class CharacterContoll0 : MonoBehaviour
 {
 
     //parametrs
-    GameControls playerInput;
+    PlayerInputM playerInput;
     CharacterController characterController;
     Animator animator;
 
@@ -23,7 +23,7 @@ public class CharacterContoll0 : MonoBehaviour
     //states
     bool isMovementPressed;
 
-    // bool isRunPressed;
+    bool isRunPressed;
 
 
 
@@ -46,29 +46,29 @@ public class CharacterContoll0 : MonoBehaviour
 
 
     int isWalkingHash;
-    // int isRunningHash;
+    int isRunningHash;
 
 
     private void Awake()
     {
-        playerInput = new GameControls();
+        playerInput = new PlayerInputM();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
 
         isWalkingHash = Animator.StringToHash("isWalking");
-        //isRunningHash = Animator.StringToHash("isRunning");
+        isRunningHash = Animator.StringToHash("isRunning");
         isJumpingHash = Animator.StringToHash("isJumping");
 
-        playerInput.Player.Move.started += onMovementInput;
-        playerInput.Player.Move.canceled += onMovementInput;
-        playerInput.Player.Move.performed += onMovementInput;
+        playerInput.CharacterControls.Move.started += onMovementInput;
+        playerInput.CharacterControls.Move.canceled += onMovementInput;
+        playerInput.CharacterControls.Move.performed += onMovementInput;
             
 
-        playerInput.Player.Jump.started += onJump;
-        playerInput.Player.Jump.canceled += onJump;
+        playerInput.CharacterControls.Jump.started += onJump;
+        playerInput.CharacterControls.Jump.canceled += onJump;
 
-        // playerInput.Player.Run.started += onRun;
-        // playerInput.Player.Run.canceled += onRun;
+        playerInput.CharacterControls.Sprint.started += onRun;
+        playerInput.CharacterControls.Sprint.canceled += onRun;
 
 
         setupJumpVariables();
@@ -104,10 +104,10 @@ public class CharacterContoll0 : MonoBehaviour
         isJumpPressed = context.ReadValueAsButton();
     }
 
-    // void onRun(InputAction.CallbackContext context)
-    // {
-    //     isRunPressed = context.ReadValueAsButton();
-    // }
+     void onRun(InputAction.CallbackContext context)
+     {
+         isRunPressed = context.ReadValueAsButton();
+     }
 
     void handleRotation()
     {
@@ -116,7 +116,8 @@ public class CharacterContoll0 : MonoBehaviour
         positionToLookAt.x = currentMovement.x;
         positionToLookAt.y = zero;
         positionToLookAt.z = currentMovement.z;
-        Quaternion currentRotation = transform.rotation; ; // на заметку
+        Quaternion currentRotation = transform.rotation;
+        
 
 
 
@@ -156,7 +157,7 @@ public class CharacterContoll0 : MonoBehaviour
     {
         bool isWalking = animator.GetBool(isWalkingHash);
 
-        // bool isRunning = animator.GetBool(isRunningHash);
+        bool isRunning = animator.GetBool(isRunningHash);
 
         if (isMovementPressed && !isWalking)
         {
@@ -169,15 +170,15 @@ public class CharacterContoll0 : MonoBehaviour
             animator.SetBool("isWalking", false);
         }
 
-        // if ((isMovementPressed && isRunPressed) && !isRunning)
-        // {
-        //     animator.SetBool(isRunningHash, true);
-        // }
+         if ((isMovementPressed && isRunPressed) && !isRunning)
+         {
+             animator.SetBool(isRunningHash, true);
+         }
 
-        // else if ((!isMovementPressed || !isRunPressed) && isRunning)
-        // {
-        //     animator.SetBool(isRunningHash, false);
-        // }
+         else if ((!isMovementPressed || !isRunPressed) && isRunning)
+         {
+             animator.SetBool(isRunningHash, false);
+         }
 
 
 
@@ -233,22 +234,22 @@ public class CharacterContoll0 : MonoBehaviour
         handleAnimation();
         handleRotation();
 
-        // if (isRunPressed)
-        // {
-        //     characterController.Move(currentRunMovement * Time.deltaTime);
-        // }
-        // else
-        // {
+         if (isRunPressed)
+         {
+             characterController.Move(currentRunMovement * Time.deltaTime);
+         }
+         else
+          {
             characterController.Move(currentMovement * Time.deltaTime);
 
-        // }
+        }
 
         handleGravity();
         handleJump();
 
-        // if (isRunPressed)
-        //     characterController.Move(currentRunMovement * Time.deltaTime);
-        // else
+        if (isRunPressed)
+             characterController.Move(currentRunMovement * Time.deltaTime);
+        else
             characterController.Move(currentMovement * Time.deltaTime);
 
 
@@ -256,15 +257,57 @@ public class CharacterContoll0 : MonoBehaviour
 
     private void OnEnable()
     {
-        playerInput.Player.Enable();
+        playerInput.CharacterControls.Enable();
     }
 
     private void OnDisable()
     {
-        playerInput.Player.Disable();
+        playerInput.CharacterControls.Disable();
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
