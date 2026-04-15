@@ -10,7 +10,7 @@ public class HemisphereGenerator : MonoBehaviour
     public int longitudeSegments = 20;
 
     [Header("Adaptation Settings")]
-    public LayerMask obstacleLayer = -1; // Слои препятствий (стены, потолки и т.д.)
+    public LayerMask obstacleLayer = -1;
     public float adaptationSpeed = 5f;
     public float shrinkMultiplier = 0.8f;
     public bool smoothAdaptation = true;
@@ -20,8 +20,9 @@ public class HemisphereGenerator : MonoBehaviour
     public float playerBuffer = 0.2f;
 
     [Header("Enemy Detection")]
-    public LayerMask enemyLayer = 1 << 8; // Слой врагов
+    public LayerMask enemyLayer = 1 << 8;
     public List<Transform> detectedEnemies = new List<Transform>();
+    public float detectionCheckRadius = 0.5f; // Радиус проверки врагов в каждой точке
 
     [Header("Debug Visualization")]
     public bool showRays = true;
@@ -32,7 +33,6 @@ public class HemisphereGenerator : MonoBehaviour
     private List<float> adaptedRadii = new List<float>();
     private List<float> targetRadii = new List<float>();
     private List<RaycastHit> hitInfos = new List<RaycastHit>();
-    private SphereCollider triggerCollider;
 
     void Start()
     {
@@ -42,8 +42,8 @@ public class HemisphereGenerator : MonoBehaviour
         if (player == null)
             player = transform;
 
-        // Создаем или настраиваем триггер-коллайдер
-        //SetupTriggerCollider();
+        // НЕ СОЗДАЕМ ОБЫЧНЫЙ КОЛЛАЙДЕР!
+        // SetupTriggerCollider(); // УДАЛИ ЭТУ СТРОКУ
     }
 
     void Update()
@@ -52,23 +52,85 @@ public class HemisphereGenerator : MonoBehaviour
         if (smoothAdaptation)
             SmoothRadiusTransition();
 
-        // Проверяем видимость обнаруженных врагов
-        ValidateEnemyVisibility();
+        // Проверяем врагов в адаптивной зоне
+        CheckEnemiesInAdaptiveZone();
     }
-    /*
-    void SetupTriggerCollider()
+
+    // Новый метод: проверка врагов только в видимых областях
+    void CheckEnemiesInAdaptiveZone()
     {
-        triggerCollider = GetComponent<SphereCollider>();
-        if (triggerCollider == null)
+        Vector3 origin = player.position;
+        List<Transform> currentlyDetected = new List<Transform>();
+
+        // Проверяем каждую точку адаптивной полусферы
+        for (int i = 0; i < hemisphereDirections.Count; i++)
         {
-            triggerCollider = gameObject.AddComponent<SphereCollider>();
+            if (i >= adaptedRadii.Count) continue;
+
+            Vector3 direction = hemisphereDirections[i];
+            float radius = adaptedRadii[i];
+
+            // Создаем точку на поверхности адаптивной полусферы
+            Vector3 checkPoint = origin + direction * radius;
+
+            // Ищем врагов вокруг этой точки
+            Collider[] nearbyEnemies = Physics.OverlapSphere(checkPoint, detectionCheckRadius, enemyLayer);
+
+            foreach (Collider enemyCollider in nearbyEnemies)
+            {
+                Transform enemy = enemyCollider.transform;
+
+                // Проверяем прямую видимость до врага
+                if (IsEnemyVisible(enemy) && !currentlyDetected.Contains(enemy))
+                {
+                    currentlyDetected.Add(enemy);
+
+                    // Если враг новый - добавляем в список
+                    if (!detectedEnemies.Contains(enemy))
+                    {
+                        detectedEnemies.Add(enemy);
+
+                        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
+                        if (enemyAI != null)
+                        {
+                            enemyAI.SetTarget(player);
+                        }
+
+                        Debug.Log($"Enemy detected: {enemy.name}");
+                    }
+                }
+            }
         }
 
-        triggerCollider.isTrigger = true;
-        triggerCollider.radius = maxRadius;
+        // Убираем врагов, которые больше не обнаружены
+        List<Transform> enemiesToRemove = new List<Transform>();
+        foreach (Transform enemy in detectedEnemies)
+        {
+            if (enemy == null || !currentlyDetected.Contains(enemy))
+            {
+                enemiesToRemove.Add(enemy);
+            }
+        }
+
+        foreach (Transform enemy in enemiesToRemove)
+        {
+            detectedEnemies.Remove(enemy);
+
+            if (enemy != null)
+            {
+                EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
+                if (enemyAI != null)
+                {
+                    enemyAI.LoseTarget();
+                }
+
+                Debug.Log($"Enemy lost: {enemy.name}");
+            }
+        }
     }
-    */
-    void GenerateHemisphereDirections()
+
+    // Остальные методы остаются такими же...
+    void GenerateHemisphereDirections() 
     {
         hemisphereDirections.Clear();
 
@@ -88,7 +150,6 @@ public class HemisphereGenerator : MonoBehaviour
             }
         }
     }
-
     void InitializeRadii()
     {
         adaptedRadii.Clear();
@@ -100,7 +161,6 @@ public class HemisphereGenerator : MonoBehaviour
             targetRadii.Add(maxRadius);
         }
     }
-
     void AdaptToEnvironment()
     {
         hitInfos.Clear();
@@ -130,38 +190,36 @@ public class HemisphereGenerator : MonoBehaviour
         }
 
         SmoothNeighborInfluence();
-    }
-
+}
     void SmoothNeighborInfluence()
     {
-        List<float> smoothedRadii = new List<float>(targetRadii);
+    List<float> smoothedRadii = new List<float>(targetRadii);
 
-        for (int i = 0; i < targetRadii.Count; i++)
+    for (int i = 0; i < targetRadii.Count; i++)
+    {
+        float sum = targetRadii[i];
+        int count = 1;
+
+        for (int j = 0; j < targetRadii.Count; j++)
         {
-            float sum = targetRadii[i];
-            int count = 1;
-
-            for (int j = 0; j < targetRadii.Count; j++)
+            if (i != j)
             {
-                if (i != j)
-                {
-                    Vector3 dir1 = hemisphereDirections[i];
-                    Vector3 dir2 = hemisphereDirections[j];
+                Vector3 dir1 = hemisphereDirections[i];
+                Vector3 dir2 = hemisphereDirections[j];
 
-                    if (Vector3.Dot(dir1, dir2) > 0.8f)
-                    {
-                        sum += targetRadii[j];
-                        count++;
-                    }
+                if (Vector3.Dot(dir1, dir2) > 0.8f)
+                {
+                    sum += targetRadii[j];
+                    count++;
                 }
             }
 
-            smoothedRadii[i] = Mathf.Min(sum / count, targetRadii[i]);
-        }
-
-        targetRadii = smoothedRadii;
+        smoothedRadii[i] = Mathf.Min(sum / count, targetRadii[i]);
     }
 
+    targetRadii = smoothedRadii;
+}
+    }
     void SmoothRadiusTransition()
     {
         for (int i = 0; i < adaptedRadii.Count; i++)
@@ -171,23 +229,20 @@ public class HemisphereGenerator : MonoBehaviour
         }
     }
 
-    // Проверка видимости врага (не заблокирован ли стеной)
     public bool IsEnemyVisible(Transform enemy)
     {
         Vector3 directionToEnemy = (enemy.position - player.position).normalized;
         float distanceToEnemy = Vector3.Distance(player.position, enemy.position);
 
-        // Проверяем, находится ли враг в пределах адаптированной формы
         float maxAllowedDistance = GetMaxDistanceInDirection(directionToEnemy);
 
         if (distanceToEnemy > maxAllowedDistance)
             return false;
 
-        // Дополнительная проверка прямой видимости
         RaycastHit hit;
         if (Physics.Raycast(player.position, directionToEnemy, out hit, distanceToEnemy, obstacleLayer))
         {
-            return false; // Есть препятствие между игроком и врагом
+            return false;
         }
 
         return true;
@@ -211,97 +266,6 @@ public class HemisphereGenerator : MonoBehaviour
         }
 
         return adaptedRadii[closestRayIndex];
-    }
-
-    void ValidateEnemyVisibility()
-    {
-        // Удаляем врагов, которые больше не видны
-        detectedEnemies.RemoveAll(enemy => enemy == null || !IsEnemyVisible(enemy));
-    }
-
-    // События триггера
-    void OnTriggerEnter(Collider other)
-    {
-        // Проверяем, является ли объект врагом
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0)
-        {
-            Transform enemy = other.transform;
-
-            // Проверяем видимость врага
-            if (IsEnemyVisible(enemy) && !detectedEnemies.Contains(enemy))
-            {
-                detectedEnemies.Add(enemy);
-
-                // Уведомляем врага о обнаружении игрока
-                EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-                if (enemyAI != null)
-                {
-                    enemyAI.SetTarget(player);
-                }
-
-                Debug.Log($"Enemy detected and can see player: {enemy.name}");
-            }
-        }
-    }
-
-    void OnTriggerStay(Collider other)
-    {
-        // Постоянно проверяем видимость врагов в триггере
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0)
-        {
-            Transform enemy = other.transform;
-
-            if (IsEnemyVisible(enemy))
-            {
-                if (!detectedEnemies.Contains(enemy))
-                {
-                    detectedEnemies.Add(enemy);
-
-                    EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-                    if (enemyAI != null)
-                    {
-                        enemyAI.SetTarget(player);
-                    }
-                }
-            }
-            else
-            {
-                // Враг больше не видим - убираем из списка
-                if (detectedEnemies.Contains(enemy))
-                {
-                    detectedEnemies.Remove(enemy);
-
-                    EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-                    if (enemyAI != null)
-                    {
-                        enemyAI.LoseTarget();
-                    }
-
-                    Debug.Log($"Enemy lost sight of player: {enemy.name}");
-                }
-            }
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0)
-        {
-            Transform enemy = other.transform;
-
-            if (detectedEnemies.Contains(enemy))
-            {
-                detectedEnemies.Remove(enemy);
-
-                EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-                if (enemyAI != null)
-                {
-                    enemyAI.LoseTarget();
-                }
-
-                Debug.Log($"Enemy left detection zone: {enemy.name}");
-            }
-        }
     }
 
     void OnDrawGizmos()
@@ -344,18 +308,13 @@ public class HemisphereGenerator : MonoBehaviour
                 }
 
                 Vector3 endPoint = origin + direction * currentRadius;
-                /*
                 Gizmos.DrawLine(origin, endPoint);
                 Gizmos.DrawSphere(endPoint, 0.02f);
-            */
-                }
-        }
 
-        // Рисуем адаптированную форму коллайдера
-        if (showAdaptedShape)
-        {
-            Gizmos.color = new Color(0, 1, 1, 0.3f);
-            DrawAdaptedHemisphere(origin);
+                // Рисуем сферы обнаружения на концах лучей
+                Gizmos.color = new Color(1, 1, 0, 0.2f);
+                Gizmos.DrawSphere(endPoint, detectionCheckRadius);
+            }
         }
 
         // Рисуем соединения с обнаруженными врагами
@@ -377,38 +336,6 @@ public class HemisphereGenerator : MonoBehaviour
         Gizmos.DrawSphere(origin, 0.1f);
     }
 
-    void DrawAdaptedHemisphere(Vector3 center)
-    {
-        for (int i = 0; i < hemisphereDirections.Count - 1; i++)
-        {
-            if (i >= adaptedRadii.Count) continue;
-
-            Vector3 point1 = center + hemisphereDirections[i] * adaptedRadii[i];
-
-            for (int j = i + 1; j < hemisphereDirections.Count; j++)
-            {
-                if (j >= adaptedRadii.Count) continue;
-
-                Vector3 dir1 = hemisphereDirections[i];
-                Vector3 dir2 = hemisphereDirections[j];
-
-                if (Vector3.Dot(dir1, dir2) > 0.85f)
-                {
-                    Vector3 point2 = center + hemisphereDirections[j] * adaptedRadii[j];
-                    Gizmos.DrawLine(point1, point2);
-                }
-            }
-        }
-    }
-
-    // Публичные методы для других скриптов
-    public List<Transform> GetDetectedEnemies()
-    {
-        return new List<Transform>(detectedEnemies);
-    }
-
-    public bool IsEnemyDetected(Transform enemy)
-    {
-        return detectedEnemies.Contains(enemy);
-    }
+    // УДАЛИ ВСЕ МЕТОДЫ OnTriggerEnter, OnTriggerStay, OnTriggerExit
+    // Они больше не нужны, так как мы не используем обычные коллайдеры
 }
