@@ -1,16 +1,46 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Events;
 
 public class HealfP : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Header("Health Settings")]
+    [SerializeField] float maxHealth = 100f;
+    float currentHealth;
+
+    [Header("Events")]
+    public UnityEvent OnDeath;
+    public UnityEvent<float> OnHealthChanged;
+
+    public float CurrentHealth => currentHealth;
+
+    void Awake()
     {
-        
+        currentHealth = maxHealth;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void TakeDamage(float amount)
     {
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+        OnHealthChanged?.Invoke(currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Heal(float amount)
+    {
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    private void Die()
+    {
+        Debug.Log($"{gameObject.name} has died.");
+        OnDeath?.Invoke();
         
+        // По умолчанию просто отключаем объект
+        gameObject.SetActive(false);
     }
 }

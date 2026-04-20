@@ -381,7 +381,7 @@ public class AdaptiveVisionSystem : MonoBehaviour
     /// <summary>
     /// Вызывается когда игрок обнаружен
     /// </summary>
-    protected virtual void OnPlayerDetected()
+    public virtual void OnPlayerDetected()
     {
         Debug.Log($"<color=green>[{gameObject.name}] Player detected!</color>");
         
