@@ -65,17 +65,17 @@ public class AdaptiveSphereGenerator : MonoBehaviour
             player = transform;
     }
     */
- 
+
 
     void Update()
     {
-        
+
         GenerateDirections();
         InitializeRadii();
 
         if (player == null)
             player = transform;
-        
+
         AdaptToEnvironment();
         if (smoothAdaptation)
             SmoothRadiusTransition();

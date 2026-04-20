@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class HemisphereGenerator : MonoBehaviour
 {
+    /*
     [Header("Hemisphere Collider Settings")]
     public float maxRadius = 5f;
     public float minRadius = 0.5f;
@@ -338,4 +339,5 @@ public class HemisphereGenerator : MonoBehaviour
 
     // УДАЛИ ВСЕ МЕТОДЫ OnTriggerEnter, OnTriggerStay, OnTriggerExit
     // Они больше не нужны, так как мы не используем обычные коллайдеры
+    */
 }

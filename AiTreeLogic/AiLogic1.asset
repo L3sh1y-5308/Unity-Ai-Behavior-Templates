@@ -30,7 +30,7 @@ MonoBehaviour:
   m_Nodes:
   - rid: 3919378920363786323
   - rid: 3919378920363786364
-  m_VersionTimestamp: 639120472367334979
+  m_VersionTimestamp: 639120642388464663
   m_SerializedVersion: 2
   m_DebugInfo: {fileID: -2382863005557858501}
   m_RuntimeGraph: {fileID: 4365503636127914771}
@@ -111,7 +111,7 @@ MonoBehaviour:
     - rid: 3919378920363786364
       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
-        Position: {x: -169.27997, y: -117.440056}
+        Position: {x: -70.07997, y: -130.88004}
         ID:
           m_Value0: 7381842268903953860
           m_Value1: 2539989151620912759
@@ -176,15 +176,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
   m_Name: AiLogic1 Blackboard
   m_EditorClassIdentifier: 
-  VersionTimestamp: 639120472366259910
+  VersionTimestamp: 639120531539132570
   AssetID:
     m_Value0: 8429794925409165872
     m_Value1: 7919444405145311467
   m_Blackboard:
     m_Variables:
     - rid: 3919378920363786325
-    - rid: 3919378920363786349
-    - rid: 3919378920363786371
   m_SharedBlackboardVariableGuids: []
   references:
     version: 2
@@ -196,22 +194,6 @@ MonoBehaviour:
           m_Value0: 1
           m_Value1: 0
         Name: Self
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786349
-      type: {class: 'BlackboardVariable`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 6798604941324738093
-          m_Value1: 3216926494167080680
-        Name: New Field Of View Cone
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786371
-      type: {class: 'BlackboardVariable`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1975607753492206444
-          m_Value1: 14511077078636156484
-        Name: New Field Of View Cone (1)
         m_Value: {fileID: 0}
 --- !u!114 &4365503636127914771
 MonoBehaviour:
@@ -245,8 +227,8 @@ MonoBehaviour:
           rid: 3919378920363786327
         BlackboardGroupReferences: []
         Root:
-          rid: 3919378920363786372
-        m_VersionTimestamp: 639120472367334979
+          rid: 3919378926075904065
+        m_VersionTimestamp: 639120642388464663
     - rid: 3919378920363786327
       type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -257,10 +239,16 @@ MonoBehaviour:
       type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         m_Variables:
-        - rid: 3919378920363786373
-        - rid: 3919378920363786374
-        - rid: 3919378920363786375
-    - rid: 3919378920363786372
+        - rid: 3919378920363786396
+    - rid: 3919378920363786396
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 0}
+    - rid: 3919378926075904065
       type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -274,30 +262,6 @@ MonoBehaviour:
           rid: -2
         Repeat: 1
         AllowMultipleRepeatsPerTick: 0
-    - rid: 3919378920363786373
-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1
-          m_Value1: 0
-        Name: Self
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786374
-      type: {class: 'BlackboardVariable`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 6798604941324738093
-          m_Value1: 3216926494167080680
-        Name: New Field Of View Cone
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786375
-      type: {class: 'BlackboardVariable`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 1975607753492206444
-          m_Value1: 14511077078636156484
-        Name: New Field Of View Cone (1)
-        m_Value: {fileID: 0}
 --- !u!114 &6873483784428891749
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -315,9 +279,7 @@ MonoBehaviour:
     m_Value1: 7919444405145311467
   m_Variables:
   - rid: 3919378920363786331
-  - rid: 3919378920363786348
-  - rid: 3919378920363786370
-  m_VersionTimestamp: 639120472395797023
+  m_VersionTimestamp: 639120531539132570
   m_CommandBuffer:
     m_Commands: []
   m_RuntimeBlackboardAsset: {fileID: 2425311206496808091}
@@ -331,26 +293,6 @@ MonoBehaviour:
           m_Value0: 1
           m_Value1: 0
         Name: Self
-        IsExposed: 1
-        m_IsShared: 0
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786348
-      type: {class: 'TypedVariableModel`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        ID:
-          m_Value0: 6798604941324738093
-          m_Value1: 3216926494167080680
-        Name: New Field Of View Cone
-        IsExposed: 1
-        m_IsShared: 0
-        m_Value: {fileID: 0}
-    - rid: 3919378920363786370
-      type: {class: 'TypedVariableModel`1[[SetDetectionModeAction/FieldOfViewCone, Assembly-CSharp]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        ID:
-          m_Value0: 1975607753492206444
-          m_Value1: 14511077078636156484
-        Name: New Field Of View Cone (1)
         IsExposed: 1
         m_IsShared: 0
         m_Value: {fileID: 0}

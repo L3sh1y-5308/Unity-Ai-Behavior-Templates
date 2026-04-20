@@ -49,6 +49,13 @@ public class EnemyAI : MonoBehaviour
     {
         target = newTarget;
         hasTarget = true;
+
+        if (navAgent != null)
+        {
+            navAgent.isStopped = false; // Убеждаемся, что агент не остановлен
+            navAgent.SetDestination(target.position);
+        }
+
         Debug.Log($"{gameObject.name} is now chasing {target.name}");
     }
 
