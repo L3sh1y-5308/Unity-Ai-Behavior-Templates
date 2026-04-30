@@ -66,14 +66,18 @@ public class AdaptiveVisionSystem : MonoBehaviour
 
     void Start()
     {
-        GenerateDirections();
-        InitializeRanges();
+        // GenerateDirections();
+        //InitializeRanges();
     }
 
     void Update()
     {
+        GenerateDirections();
+        InitializeRanges();
+
+
         AdaptToEnvironment();
-        
+
         if (smoothAdaptation)
             SmoothRangeTransition();
 
@@ -272,7 +276,7 @@ public class AdaptiveVisionSystem : MonoBehaviour
 
         // Обновляем состояние обнаружения игрока
         bool wasVisible = isPlayerVisible;
-        
+
         if (foundPlayer != null)
         {
             detectedPlayer = foundPlayer;
@@ -384,7 +388,7 @@ public class AdaptiveVisionSystem : MonoBehaviour
     public virtual void OnPlayerDetected()
     {
         Debug.Log($"<color=green>[{gameObject.name}] Player detected!</color>");
-        
+
         // Интеграция с EnemyAI
         EnemyAI enemyAI = GetComponent<EnemyAI>();
         if (enemyAI != null)
@@ -399,7 +403,7 @@ public class AdaptiveVisionSystem : MonoBehaviour
     protected virtual void OnPlayerLost()
     {
         Debug.Log($"<color=yellow>[{gameObject.name}] Player lost!</color>");
-        
+
         // Интеграция с EnemyAI
         EnemyAI enemyAI = GetComponent<EnemyAI>();
         if (enemyAI != null)
