@@ -5,7 +5,7 @@ public class HealfP : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] float maxHealth = 100f;
-    float currentHealth;
+    public float currentHealth;
 
     [Header("Events")]
     public UnityEvent OnDeath;
@@ -33,6 +33,11 @@ public class HealfP : MonoBehaviour
     {
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    public void ReceiveDamage(float damage)
+    {
+        TakeDamage(damage);
     }
 
     private void Die()

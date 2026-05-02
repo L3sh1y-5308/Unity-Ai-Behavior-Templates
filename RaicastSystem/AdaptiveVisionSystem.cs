@@ -85,6 +85,34 @@ public class AdaptiveVisionSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// Проверяет, может ли враг видеть игрока.
+    /// Используется для интеграции с Behavior Tree.
+    /// Для работы с NodeCanvas: установите этот метод в Condition Node с включенным Conditional Abort.
+    /// </summary>
+    public bool CanSeePlayer()
+    {
+        // Проверяем, обнаружен ли игрок и виден ли он
+        if (detectedPlayer != null && isPlayerVisible)
+        {
+            return IsPlayerVisible(detectedPlayer);
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Возвращает текущего обнаруженного игрока (если он виден).
+    /// Для удобства работы с Behavior Tree.
+    /// </summary>
+    public Transform GetDetectedPlayer()
+    {
+        if (CanSeePlayer())
+        {
+            return detectedPlayer;
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Генерирует направления лучей для системы обзора
     /// </summary>
     void GenerateDirections()
