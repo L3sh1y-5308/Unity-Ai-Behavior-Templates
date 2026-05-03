@@ -11,24 +11,60 @@ public class EnemyAI : MonoBehaviour
     private BlackboardVariable m_detectedFood;
     private BlackboardVariable m_dangerDetect;
     private BlackboardVariable m_detectedDanger;
+    private BlackboardVariable m_attaking;
 
     private Transform targetPlayer;
     private Transform detectedFood;
     private Transform detectedDanger;
     private bool hasTarget;
 
+    [Header("Animator")]
+    private Animator animator;
+    [SerializeField] public string attackAnimatorParameterName = "Rat_Attaking";
+
     public Transform TargetPlayer => targetPlayer;
     public bool HasTarget => hasTarget;
     public Transform DetectedFood => detectedFood;
     public Transform DetectedDanger => detectedDanger;
 
+    private AdaptiveVisionSystem visionSystem;
+
     void Awake()
     {
         behaviorAgent = GetComponent<BehaviorGraphAgent>();
+        visionSystem = GetComponent<AdaptiveVisionSystem>();
+        animator = GetComponent<Animator>();
 
         if (behaviorAgent == null)
         {
             Debug.LogError($"EnemyAI на {gameObject.name} требует BehaviorGraphAgent компонент!");
+        }
+
+        if (animator == null)
+        {
+            Debug.LogWarning($"EnemyAI на {gameObject.name} требует Animator компонент для синхронизации анимации!");
+        }
+    }
+
+    void Update()
+    {
+        // Sync vision system state with AI
+        if (visionSystem != null)
+        {
+            if (visionSystem.isPlayerVisible && visionSystem.detectedPlayer != null)
+                SetTarget(visionSystem.detectedPlayer);
+            else if (!visionSystem.isPlayerVisible)
+                LoseTarget();
+
+            if (visionSystem.isFoodVisible && visionSystem.detectedFood != null)
+                SetDetectedFood(visionSystem.detectedFood);
+            else if (!visionSystem.isFoodVisible)
+                LoseFood();
+
+            if (visionSystem.isDangerVisible && visionSystem.detectedDanger != null)
+                SetDetectedDanger(visionSystem.detectedDanger);
+            else if (!visionSystem.isDangerVisible)
+                LoseDanger();
         }
     }
 
@@ -79,7 +115,7 @@ public class EnemyAI : MonoBehaviour
     }
 
     /// <summary>
-    /// Теряет еду из виду.
+    /// Теряет еду из вида.
     /// </summary>
     public void LoseFood()
     {
@@ -116,6 +152,20 @@ public class EnemyAI : MonoBehaviour
     }
 
     /// <summary>
+    /// Синхронизирует состояние Attaking из Blackboard с параметром Animator
+    /// </summary>
+    private void SyncAttakingWithAnimator()
+    {
+        if (animator == null || m_attaking == null)
+            return;
+
+        bool attackingState = (bool)m_attaking.ObjectValue;
+        animator.SetBool(attackAnimatorParameterName, attackingState);
+
+        Debug.Log($"<color=magenta>[EnemyAI] Animator синхронизирован: {attackAnimatorParameterName} = {attackingState}</color>");
+    }
+
+    /// <summary>
     /// Обновляет все переменные Blackboard для BehaviorTree
     /// </summary>
     void UpdateBlackboard()
@@ -135,6 +185,15 @@ public class EnemyAI : MonoBehaviour
         {
             m_targetPlayer.ObjectValue = targetPlayer;
         }
+
+        // Анимация атаки
+        behaviorAgent.BlackboardReference.GetVariable("Attaking", out m_attaking);
+        if (m_attaking != null)
+        {
+            m_attaking.ObjectValue = hasTarget;
+            SyncAttakingWithAnimator();
+        }
+
 
         // Еда
         behaviorAgent.BlackboardReference.GetVariable("FoodDetect", out m_foodDetect);
