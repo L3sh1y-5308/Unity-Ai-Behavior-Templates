@@ -18,10 +18,20 @@ public partial class FleeTickAction : Action
     {
         if (Flee.Value == null || Threat.Value == null) return Status.Failure;
 
-        Flee.Value.Tick(Threat.Value.transform);
+        // Call the tick method and capture its phase result
+        int phase = Flee.Value.Tick(Threat.Value.transform);
+
+        // Update the blackboard with the current cornered state
         IsCornered.Value = Flee.Value.IsCornered();
 
-        return Status.Running; // тикаем непрерывно, пока Danger не пропадёт
+        // Phase 2 indicates the agent is cornered; return Failure to allow tree to switch to attack
+        if (phase == 2)
+        {
+            return Status.Failure;
+        }
+
+        // Otherwise continue running (keep fleeing / accumulating panic)
+        return Status.Running;
     }
 
     protected override void OnEnd()
